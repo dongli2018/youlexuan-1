@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    		http://www.springframework.org/schema/beans/spring-beans.xsd
+    		http://www.springframework.org/schema/context
+    		http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!-- 产生Connection的ConnectionFactory，由对应的 JMS服务厂商提供 -->
+    <bean id="targetConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://10.10.127.27:61616" />
+    </bean>
+
+    <!-- Spring用于管理ConnectionFactory的ConnectionFactory -->
+    <bean id="connectionFactory"
+          class="org.springframework.jms.connection.SingleConnectionFactory">
+        <property name="targetConnectionFactory" ref="targetConnectionFactory" />
+    </bean>
+
+    <!--主题目的地，点对多信息 -->
+    <bean id="createPageDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg value="youlexuan_createpage" />
+    </bean>
+
+    <!-- 消息监听容器 -->
+    <bean
+            class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="destination" ref="createPageDestination" />
+        <property name="messageListener" ref="createPageListen" />
+    </bean>
+
+    <!--主题目的地，点对多信息 -->
+    <bean id="topic1DelSolrDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg value="youlexuan_topic_delsolr" />
+    </bean>
+
+    <!-- 消息监听容器 -->
+    <bean
+            class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="destination" ref="topic1DelSolrDestination" />
+        <property name="messageListener" ref="deletePageListen" />
+    </bean>
+
+</beans>
